@@ -20,7 +20,7 @@ mvn --version
 
 sudo wget -O /etc/yum.repos.d/jenkins.repo     https://pkg.jenkins.io/redhat-stable/jenkins.repo
 sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-sudo amazon-linux-extras install epel -y
+sudo amazon-linux-extras install epel -y # is you are using Amazon Linux 3 or higher then this command is not required.
 sudo yum install daemonize -y
 sudo yum install -y jenkins
 sudo service jenkins start
