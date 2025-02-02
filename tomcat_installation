@@ -1,0 +1,77 @@
+create an instance (t2.micro), Linux 2 AMI, tomcat works on port 8080. install tomcat for CICD
+================================================================================
+
+sudo yum install -y java-1.8.0
+sudo yum install -y tomcat
+sudo systemctl start tomcat
+sudo systemctl status tomcat
+sudo systemctl enable tomcat                         	
+sudo yum install -y tomcat-webapps tomcat-admin-webapps tomcat-docs-webapp tomcat-javadoc
+cd /usr/share/tomcat/webapps
+sudo chmod 777 /usr/share/tomcat/webapps/
+
+
+=================================
+how to access tomcat from browser:
+http://<public IP of tomcat instance>:8080
+
+
+=====================how to add stage
+Add tomcat credential in jenkins
+lets add pem key: jenkins dashbard -> credentials -> system-> global credentials-> add credetians -> ssh username with private key
+
+ID(DEVCICD)
+username: ec2-user
+Privaye key: copy paste pem key content
+
+
+
+2: Plugin install: 
+ssh agent
+ssh pipeline steps
+
+
+3: generate script: syntax generate
+
+
+search ssh agent: select ec2-user (default user) then click on generate script
+
+sshagent(['DEVCICD']) {
+    // some block
+}
+
+
+4: how to update //some block:  -> copy the example by clickng on ?
+
+sh 'ssh -o StrictHostKeyChecking=no -l cloudbees 192.168.1.106 uname -a'
+
+
+5: replace ssh with scp  (why-> bcas we just need copy paste the file)
+-o                        ->option
+StrictHostKeyChecking=no  -> dont check the key
+-l cloudbees 192.168.1.106 uname -a  -> ignore
+
+
+6: updated command:
+
+sh 'scp -o StrictHostKeyChecking=no  <source file> <destination file>'
+OR
+sh 'scp -o StrictHostKeyChecking=no  <source file> <user name>@<ip od tomcat server>:<destination file>'
+
+
+7:lets update source & destination
+
+sh 'scp -o StrictHostKeyChecking=no webapp/target/webapps.war ec2-user@172.31.27.20:/usr/share/tomcat/webapps'
+
+
+8: Actual stage:
+
+stage('deploy to tomcat')
+{ steps { sshagent(['DEVCICD'])
+  { sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@172.31.27.20:/usr/share/tomcat/webapps'  } } }
+
+================================
+After deployment(CICD)
+http://<public IP of tomcat instance>:8080/<artifact name>
+
+ex: http://<public IP of tomcat instance>:8080/webapp
