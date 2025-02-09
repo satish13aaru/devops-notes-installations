@@ -61,7 +61,7 @@ sh 'scp -o StrictHostKeyChecking=no  <source file> <user name>@<ip od tomcat ser
 
 7:lets update source & destination
 
-sh 'scp -o StrictHostKeyChecking=no webapp/target/webapps.war ec2-user@172.31.27.20:/usr/share/tomcat/webapps'
+sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@172.31.27.20:/usr/share/tomcat/webapps'
 
 
 8: Actual stage:
