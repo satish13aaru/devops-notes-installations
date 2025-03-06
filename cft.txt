@@ -1,0 +1,129 @@
+{
+    "Resources": {
+        "myVPC" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock" : "10.0.0.0/16",
+                "EnableDnsSupport" : "false",
+                "EnableDnsHostnames" : "false",
+                "Tags" : [ 
+                    {"Key" : "stack", "Value" : "production"} 
+                ]
+            }
+        },
+        "myInternetGateway" : {
+             "Type" : "AWS::EC2::InternetGateway",
+             "Properties" : {
+               "Tags" : [ {"Key" : "stack", "Value" : "production"}]
+             }
+          },
+          "myVPCGatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+              "VpcId": {
+                "Ref": "myVPC"
+              },
+              "InternetGatewayId": {
+                "Ref": "myInternetGateway"
+              }
+            }
+          },
+        "myRouteTable" : {
+         "Type" : "AWS::EC2::RouteTable",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myVPC" },
+            "Tags" : [ { "Key" : "stack", "Value" : "production" } ]
+         }
+      },
+        "myRoute" : {
+          "Type" : "AWS::EC2::Route",
+          "Properties" : {
+            "RouteTableId" : { "Ref" : "myRouteTable" },
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            "GatewayId" : { "Ref" : "myInternetGateway" }
+          }
+        },    
+        "mypubSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+              "VpcId": {"Ref": "myVPC"},
+              "CidrBlock": "10.0.1.0/24",
+              "MapPublicIpOnLaunch": true
+            }
+          },
+          "myprivSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+              "VpcId": {"Ref": "myVPC"},
+              "CidrBlock": "10.0.2.0/24"
+            }
+          },
+        "mypubSubnetRouteTableAssociation" : {
+          "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+          "Properties" : {
+            "SubnetId" : { "Ref" : "mypubSubnet" },
+            "RouteTableId" : { "Ref" : "myRouteTable" }
+          }
+        },
+        "myprivSubnetRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+              "SubnetId" : { "Ref" : "myprivSubnet" },
+              "RouteTableId" : { "Ref" : "myRouteTable" }
+            }
+          },
+        "mySecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+              "VpcId": {"Ref": "myVPC"},
+              "GroupDescription": "Allow http to client host",
+              "SecurityGroupIngress": [
+                {
+                  "IpProtocol": "tcp",
+                  "FromPort": 80,
+                  "ToPort": 80,
+                  "CidrIp": "0.0.0.0/0"
+                },
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "CidrIp": "0.0.0.0/0"
+                  },
+                  {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "CidrIp": "0.0.0.0/0"
+                  }
+              ]
+            }
+          },
+      "NewKeyPair": {
+        "Type": "AWS::EC2::KeyPair",
+        "Properties": {
+            "KeyName": "devsecops"
+        }
+    },
+    "mypubEC2Instance": {
+        "Type": "AWS::EC2::Instance",
+        "Properties": {
+          "ImageId": "ami-0d682f26195e9ec0f",
+          "InstanceType": "t2.micro",
+          "KeyName": "devsecops",
+          "SubnetId": {"Ref": "mypubSubnet"},
+          "SecurityGroupIds": [{"Ref": "mySecurityGroup"}]
+        }
+      },
+      "myprivEC2Instance": {
+        "Type": "AWS::EC2::Instance",
+        "Properties": {
+          "ImageId": "ami-0d682f26195e9ec0f",
+          "InstanceType": "t2.micro",
+          "KeyName": "devsecops",
+          "SubnetId": {"Ref": "myprivSubnet"},
+          "SecurityGroupIds": [{"Ref": "mySecurityGroup"}]
+        }
+      }
+      }
+    } 
