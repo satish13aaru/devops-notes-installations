@@ -1,2 +1,3 @@
 this is my first git rebase command usage
 hello, please merge the code to local repo
+new changes
